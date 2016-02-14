@@ -2,57 +2,105 @@ var h = document.querySelector('.h');
 var min = document.querySelector('.min');
 var sec = document.querySelector('.sec');
 var msec = document.querySelector('.msec');
+var jumbotron = document.querySelector('.jumbotron');
 
-var st = document.querySelector('.st');
-var sp = document.querySelector('.sp');
-var rs = document.querySelector('.rs');
+var startStop = document.querySelector('.start-stop');
+var split = document.querySelector('.split');
+var reset = document.querySelector('.reset');
+
 var clickClock;
+var TOGGLE = false;
+var savedTime = 0;
+var time = 0;
 
-st.addEventListener('click', startStop);
-// sp.addEventListener('click', splitTime);
-rs.addEventListener('click', reset);
+startStop.addEventListener('click', startStopF);
+split.addEventListener('click', splitTimeF);
+reset.addEventListener('click', resetF);
 
 
-function startStop () {
+function startStopF () {
 	var start = new Date;
-	var startHr = start.getHours();
-	var startMin = start.getMinutes();
-	var startSec = start.getSeconds();
-	var startMs = start.getMilliseconds();
 
-	clickClock = setInterval(function () {
-		var now = new Date;
-		var nowHr = now.getHours();
-		var nowMin = now.getMinutes();
-		var nowSec = now.getSeconds();
-		var nowMs = now.getMilliseconds();
+	if (TOGGLE) {
 
-		var hours = nowHr - startHr;
-		var minutes = nowMin - startMin;
-		var seconds = nowSec - startSec;
-		var milliseconds = nowMs - startMs;
+		clearInterval(clickClock);
+		savedTime = time;
+		toggleOff();
 
-		if (hours < 10) hours = '0' + hours;
-		if (minutes < 10) minutes = '0' + minutes;
-		if (seconds < 10) seconds = '0' + seconds;
-		if (milliseconds < 10) {
-			milliseconds = '00' + milliseconds;
-		} else if (milliseconds < 100) {
-			milliseconds = '0' + milliseconds;
-		};
+	} else {
+		toggleOn();
 
-		h.innerHTML = hours;
-		min.innerHTML = minutes;
-		sec.innerHTML = seconds;
-		msec.innerHTML = milliseconds;
-	}, 1);
+		clickClock = setInterval(function () {
+			var now = new Date;
+			time = savedTime + (now - start);
+
+			var calcMin = time % 3600000;
+			var calcSec = calcMin % 60000;
+			
+			var hours = Math.floor(time / 3600000);
+			var minutes = Math.floor(calcMin / 60000);
+			var seconds = Math.floor(calcSec / 1000);
+			var milliseconds = calcSec % 1000;
+
+			if (hours < 10) hours = '0' + hours;
+			if (minutes < 10) minutes = '0' + minutes;
+			if (seconds < 10) seconds = '0' + seconds;
+			if (milliseconds < 10) {
+				milliseconds = '00' + milliseconds;
+			} else if (milliseconds < 100) {
+				milliseconds = '0' + milliseconds;
+			};
+
+			h.innerHTML = hours;
+			min.innerHTML = minutes;
+			sec.innerHTML = seconds;
+			msec.innerHTML = milliseconds;
+		}, 1);
+	}
 }
 
 
-function reset () {
+function splitTimeF () {
+	if (TOGGLE) {
+		var h3 = document.createElement('h3');
+		h3.innerHTML = 'Split ' + h.innerHTML + ':' + min.innerHTML + 
+		':' + sec.innerHTML + '.' + msec.innerHTML;
+		jumbotron.appendChild(h3);
+	}
+}
+
+
+function resetF () {
 	clearInterval(clickClock);
+
 	h.innerHTML = '00';
 	min.innerHTML = '00';
 	sec.innerHTML = '00';
 	msec.innerHTML = '000';
+	time = 0;
+	savedTime = 0;
+
+	toggleOff();
+
+	var splits = jumbotron.querySelectorAll('h3');
+	for (var i = 0; i < splits.length; i++) {
+		jumbotron.removeChild(splits[i]);
+	}
+}
+
+
+function toggleOn () {
+	TOGGLE = true;
+
+	startStop.classList.remove('btn-success');
+	startStop.classList.add('btn-warning');
+	startStop.innerHTML = 'Stop';
+}
+
+function toggleOff () {
+	TOGGLE = false;
+
+	startStop.classList.remove('btn-warning');
+	startStop.classList.add('btn-success');
+	startStop.innerHTML = 'Start';
 }
