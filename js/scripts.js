@@ -26,6 +26,10 @@ function startStopF () {
 		clearInterval(clickClock);
 		savedTime = time;
 		toggleOff();
+		var h3 = document.createElement('h3');
+		h3.innerHTML = 'Stop ' + h.innerHTML + ':' + min.innerHTML + 
+		':' + sec.innerHTML + '.' + msec.innerHTML;
+		jumbotron.appendChild(h3);
 
 	} else {
 		toggleOn();
